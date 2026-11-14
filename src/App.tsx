@@ -1,4 +1,5 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
+import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
 import {
   ArrowDownRight,
   ArrowLeft,
@@ -22,6 +23,20 @@ import {
   X,
   Zap,
 } from 'lucide-react';
+
+function useIsTouch() {
+  const [isTouch, setIsTouch] = useState(false);
+  useEffect(() => {
+    const mq = window.matchMedia('(pointer: coarse)');
+    const update = () => setIsTouch(mq.matches);
+    update();
+    mq.addEventListener('change', update);
+    return () => mq.removeEventListener('change', update);
+  }, []);
+  return isTouch;
+}
+
+const rolesList = ['Product Designer', 'UI/UX Designer', 'Website Designer', 'AI Designer'];
 
 type Project = {
   id: string;
@@ -115,12 +130,12 @@ const whyTeams = [
 const marqueeItems = ['Product design', 'UI/UX', 'Research', 'Prototyping', 'Mobile apps', 'Web apps', 'Systems thinking'];
 
 const services = [
-  { title: 'UI/UX Design', desc: 'Crafting intuitive interfaces and seamless user experiences for digital products.', icon: PenTool, color: '#F2D477' },
-  { title: 'End-to-End Product Design', desc: 'From problem definition to final pixel — the full product design journey.', icon: Layers, color: '#D96C4F' },
-  { title: 'Mobile App Design', desc: 'Designing mobile experiences that feel natural and delightful to use.', icon: Smartphone, color: '#9CAF88' },
-  { title: 'Website & Landing Pages', desc: 'Conversion-focused websites and landing pages that tell your story.', icon: Layout, color: '#DDA6A0' },
-  { title: 'UX Research & Audits', desc: 'Uncovering user insights and evaluating existing experiences for improvement.', icon: Search, color: '#315C4C' },
-  { title: 'Wireframing & Prototyping', desc: 'Rapid wireframes and interactive prototypes to validate ideas early.', icon: FileText, color: '#F2D477' },
+  { title: 'UI/UX Design', desc: 'Crafting intuitive interfaces and seamless user experiences for digital products.', icon: PenTool, color: '#F2D36B', rotation: -2.5, dark: false },
+  { title: 'End-to-End Product Design', desc: 'From problem definition to final pixel — the full product design journey.', icon: Layers, color: '#DDA5A0', rotation: 1.8, dark: false },
+  { title: 'Mobile App Design', desc: 'Designing mobile experiences that feel natural and delightful to use.', icon: Smartphone, color: '#315F4F', rotation: -1.2, dark: true },
+  { title: 'Website & Landing Pages', desc: 'Conversion-focused websites and landing pages that tell your story.', icon: Layout, color: '#F4F0E4', rotation: 2.5, dark: false },
+  { title: 'UX Research & Audits', desc: 'Uncovering user insights and evaluating existing experiences for improvement.', icon: Search, color: '#E76F51', rotation: -2, dark: false },
+  { title: 'Wireframing & Prototyping', desc: 'Rapid wireframes and interactive prototypes to validate ideas early.', icon: FileText, color: '#FFFFFF', rotation: 1.5, dark: false },
 ];
 
 const skillGroups = [
@@ -296,11 +311,28 @@ function Nav({ menuOpen, setMenuOpen, onHome }: { menuOpen: boolean; setMenuOpen
 
 /* ---------- Hero ---------- */
 function Hero() {
+  const isTouch = useIsTouch();
+  const [panelOpen, setPanelOpen] = useState(false);
+  const reduce = useReducedMotion();
+
+  const handlePhotoInteraction = () => {
+    if (isTouch) setPanelOpen((v) => !v);
+  };
+
+  const photoProps = isTouch
+    ? { onClick: handlePhotoInteraction }
+    : {
+        onMouseEnter: () => setPanelOpen(true),
+        onMouseLeave: () => setPanelOpen(false),
+        onFocus: () => setPanelOpen(true),
+        onBlur: () => setPanelOpen(false),
+      };
+
   return (
     <section className="hero section-pad reveal" id="home">
-      <div className="hero-grid">
+      <div className="hero-grid-2col">
         <div className="hero-tile hero-tile-main">
-          <p className="hero-annotation">hey, my name is</p>
+          <p className="hero-annotation">Hello, I&apos;m</p>
           <div className="hero-name-box">
             <span className="hero-name" aria-label="Pabia">
               PABIA
@@ -310,38 +342,57 @@ function Hero() {
               <span className="hero-name-corner br" />
             </span>
           </div>
-          <div className="hero-status">
-            <span className="hero-status-dot" /> Open to product design opportunities
-          </div>
           <p className="hero-headline">
             I turn <span className="hl-terra">complex ideas</span> into <span className="hl-sage">useful digital experiences</span>. <span className="hero-star">✦</span>
           </p>
-          <div className="hero-ctas">
-            <a href="#work" className="hero-btn hero-btn-primary">View my work <ArrowRight size={14} /></a>
-            <a href="#contact" className="hero-btn hero-btn-secondary">Let&apos;s talk <ArrowRight size={14} /></a>
-          </div>
         </div>
 
-        <div className="hero-tile hero-tile-portrait">
+        <div
+          className="hero-tile hero-tile-portrait hero-photo-wrap"
+          {...photoProps}
+          tabIndex={0}
+          role="button"
+          aria-expanded={panelOpen}
+          aria-label={isTouch ? 'Tap to meet me' : 'Hover to meet me'}
+        >
           <img className="hero-portrait-img" src={heroImage} alt="Pabia working on a product design" />
-          <span className="hero-portrait-sticker">that&apos;s me ✦</span>
-        </div>
-
-        <div className="hero-tile hero-tile-roles">
-          <p className="hero-roles-heading">I&apos;m a...</p>
-          <div className="role-tag">Product Designer</div>
-          <br />
-          <div className="role-tag">UI/UX Designer</div>
-          <br />
-          <div className="role-tag">Website Designer</div>
-          <br />
-          <div className="role-tag">AI Designer</div>
-        </div>
-
-        <div className="hero-tile hero-tile-location">
-          <p className="hero-location-label"><MapPin size={16} /> based in</p>
-          <p className="hero-location-text">PORT HARCOURT, NIGERIA</p>
-          <Badge />
+          <AnimatePresence>
+            {!panelOpen && (
+              <motion.span
+                className="hero-photo-tag"
+                initial={reduce ? false : { opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={reduce ? { opacity: 0 } : { opacity: 0 }}
+                transition={{ duration: 0.25 }}
+              >
+                {isTouch ? 'Tap to meet me' : 'Hover to meet me'}
+              </motion.span>
+            )}
+          </AnimatePresence>
+          <AnimatePresence>
+            {panelOpen && (
+              <motion.div
+                className="hero-photo-panel"
+                initial={reduce ? false : { y: '100%' }}
+                animate={{ y: 0 }}
+                exit={reduce ? { y: '100%' } : { y: '100%' }}
+                transition={{ type: 'tween', duration: 0.45, ease: [0.2, 0.8, 0.2, 1] }}
+              >
+                <p className="hero-photo-panel-label">I&apos;m a...</p>
+                {rolesList.map((role, i) => (
+                  <motion.div
+                    key={role}
+                    className="hero-photo-panel-role"
+                    initial={reduce ? false : { opacity: 0, y: 12 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: reduce ? 0 : 0.12 + i * 0.1, duration: 0.4 }}
+                  >
+                    {role}
+                  </motion.div>
+                ))}
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
       </div>
     </section>
@@ -363,6 +414,37 @@ function Marquee() {
 
 /* ---------- Work ---------- */
 function Work({ navigateTo }: { navigateTo: (id: string) => void }) {
+  const isTouch = useIsTouch();
+  const reduce = useReducedMotion();
+  const [revealedCard, setRevealedCard] = useState<string | null>(null);
+
+  const handleCardClick = (id: string) => {
+    if (isTouch) {
+      if (revealedCard === id) {
+        navigateTo(id);
+      } else {
+        setRevealedCard(id);
+      }
+    } else {
+      navigateTo(id);
+    }
+  };
+
+  const cardProps = (id: string) =>
+    isTouch
+      ? {
+          onClick: () => handleCardClick(id),
+          onMouseEnter: () => setRevealedCard(id),
+          onMouseLeave: () => setRevealedCard(null),
+        }
+      : {
+          onClick: () => handleCardClick(id),
+          onMouseEnter: () => setRevealedCard(id),
+          onMouseLeave: () => setRevealedCard(null),
+          onFocus: () => setRevealedCard(id),
+          onBlur: () => setRevealedCard(null),
+        };
+
   return (
     <section className="work section-pad" id="work">
       <div className="section-heading reveal">
@@ -373,29 +455,181 @@ function Work({ navigateTo }: { navigateTo: (id: string) => void }) {
         <p className="section-note">Four projects across fintech, mobility, food, and brand — each one grounded in a real human need.</p>
       </div>
       <div className="project-grid reveal reveal-stagger">
-        {projects.map((project) => (
-          <button className="project-card" key={project.id} onClick={() => navigateTo(project.id)} style={{ '--card-accent': project.accent } as React.CSSProperties}>
-            <div className="project-image-wrap">
-              <img src={project.image} alt={`${project.title} project preview`} />
-              <span className="project-number">{project.number}</span>
-            </div>
-            <div className="project-card-body">
-              <div className="project-card-info">
-                <h3>{project.title}</h3>
-                <span className="label-mono-sm">{project.year}</span>
+        {projects.map((project) => {
+          const isRevealed = revealedCard === project.id;
+          return (
+            <div
+              className="project-card-reveal"
+              key={project.id}
+              {...cardProps(project.id)}
+              tabIndex={0}
+              role="button"
+              aria-label={`${project.title} — ${project.category}. ${isTouch ? 'Tap to reveal, tap again to view case study.' : 'View case study'}`}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.preventDefault();
+                  handleCardClick(project.id);
+                }
+              }}
+              style={{ '--card-accent': project.accent } as React.CSSProperties}
+            >
+              <div className="project-image-wrap">
+                <motion.img
+                  src={project.image}
+                  alt={`${project.title} project preview`}
+                  animate={reduce ? {} : isRevealed ? { scale: 1.06 } : { scale: 1 }}
+                  transition={{ duration: 0.5, ease: [0.2, 0.8, 0.2, 1] }}
+                />
+
+                <AnimatePresence>
+                  {isRevealed && (
+                    <motion.div
+                      className="project-overlay"
+                      initial={reduce ? false : { opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      exit={reduce ? { opacity: 0 } : { opacity: 0 }}
+                      transition={{ duration: 0.3 }}
+                    >
+                      <div className="project-overlay-content">
+                        <motion.span
+                          className="project-overlay-category"
+                          initial={reduce ? false : { opacity: 0, y: 20 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ delay: reduce ? 0 : 0.1, duration: 0.35 }}
+                        >
+                          {project.category}
+                        </motion.span>
+                        <motion.h3
+                          className="project-overlay-title"
+                          initial={reduce ? false : { opacity: 0, y: 20 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ delay: reduce ? 0 : 0.2, duration: 0.35 }}
+                        >
+                          {project.title}
+                        </motion.h3>
+                        <motion.p
+                          className="project-overlay-desc"
+                          initial={reduce ? false : { opacity: 0, y: 20 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ delay: reduce ? 0 : 0.3, duration: 0.35 }}
+                        >
+                          {project.description}
+                        </motion.p>
+                        <motion.span
+                          className="project-overlay-btn"
+                          initial={reduce ? false : { opacity: 0, y: 20 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ delay: reduce ? 0 : 0.4, duration: 0.35 }}
+                        >
+                          View Case Study <ArrowUpRight size={15} />
+                        </motion.span>
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
               </div>
-              <p className="project-card-category">{project.category}</p>
-              <p className="project-description">{project.description}</p>
-              <span className="project-arrow">View case study <ArrowUpRight size={15} /></span>
+
+              {isTouch && (
+                <div className="project-touch-bar">
+                  <span className="project-touch-title">{project.title}</span>
+                  <a
+                    className="project-touch-link"
+                    href="#"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      navigateTo(project.id);
+                    }}
+                  >
+                    Case Study <ArrowUpRight size={12} />
+                  </a>
+                </div>
+              )}
             </div>
-          </button>
-        ))}
+          );
+        })}
       </div>
     </section>
   );
 }
 
 /* ---------- Services ---------- */
+function ServiceCard({ svc, index }: { svc: typeof services[number]; index: number }) {
+  const isTouch = useIsTouch();
+  const reduce = useReducedMotion();
+  const [flipped, setFlipped] = useState(false);
+  const Icon = svc.icon;
+  const num = String(index + 1).padStart(2, '0');
+  const textColor = svc.dark ? 'var(--paper)' : 'var(--ink)';
+
+  const interactionProps = isTouch
+    ? { onClick: () => setFlipped((v) => !v) }
+    : {
+        onMouseEnter: () => setFlipped(true),
+        onMouseLeave: () => setFlipped(false),
+        onFocus: () => setFlipped(true),
+        onBlur: () => setFlipped(false),
+      };
+
+  const swingVariants = {
+    idle: { rotate: svc.rotation },
+    hover: { rotate: svc.rotation + (svc.rotation >= 0 ? 2.5 : -2.5) },
+  };
+
+  return (
+    <motion.div
+      className="svc-id-card-wrap"
+      initial={reduce ? false : { y: -120, opacity: 0, rotate: svc.rotation }}
+      whileInView={reduce ? {} : { y: 0, opacity: 1, rotate: svc.rotation }}
+      viewport={{ once: true, amount: 0.3 }}
+      transition={{ duration: 0.6, delay: index * 0.12, ease: [0.2, 0.8, 0.2, 1] }}
+      onAnimationComplete={() => {
+        // trigger gentle pendulum settle via CSS class
+      }}
+    >
+      <div className="svc-string" />
+      <motion.div
+        className="svc-id-card"
+        {...interactionProps}
+        tabIndex={0}
+        role="button"
+        aria-label={`${svc.title}. ${isTouch ? 'Tap to flip' : 'Hover to explore'}`}
+        whileHover={reduce ? {} : { y: -6, rotate: svc.rotation + (svc.rotation >= 0 ? 2 : -2) }}
+        animate={flipped ? swingVariants.hover : swingVariants.idle}
+        transition={{ duration: 0.4, ease: 'easeOut' }}
+        style={{ '--svc-bg': svc.color, '--svc-text': textColor } as React.CSSProperties}
+      >
+        <div className="svc-id-hole" />
+        <div className="svc-id-flipper" data-flipped={flipped}>
+          {/* FRONT */}
+          <div className="svc-id-face svc-id-front" style={{ background: svc.color, color: textColor }}>
+            <p className="svc-id-meta">Service ID / No. {num}</p>
+            <div className="svc-id-icon-box"><Icon size={30} strokeWidth={1.8} /></div>
+            <h3 className="svc-id-title">{svc.title}</h3>
+            <div className="svc-barcode">
+              {[...Array(24)].map((_, i) => (
+                <span key={i} style={{ height: i % 3 === 0 ? '100%' : i % 2 === 0 ? '70%' : '40%', width: i % 4 === 0 ? '3px' : '2px' }} />
+              ))}
+            </div>
+            <p className="svc-id-hint">{isTouch ? 'Tap to flip' : 'Hover to explore'}</p>
+          </div>
+          {/* BACK */}
+          <div className="svc-id-face svc-id-back" style={{ background: svc.color, color: textColor }}>
+            <div className="svc-id-hole svc-id-hole-back" />
+            <p className="svc-id-back-label">What it means</p>
+            <p className="svc-id-back-desc">{svc.desc}</p>
+            <div className="svc-barcode svc-barcode-back">
+              {[...Array(20)].map((_, i) => (
+                <span key={i} style={{ height: i % 3 === 0 ? '100%' : i % 2 === 0 ? '60%' : '35%', width: '2px' }} />
+              ))}
+            </div>
+          </div>
+        </div>
+      </motion.div>
+    </motion.div>
+  );
+}
+
 function Services() {
   return (
     <section className="services" id="services">
@@ -407,18 +641,17 @@ function Services() {
           </div>
           <p className="section-note">From research to final pixel — here&apos;s what you can hire me to help with.</p>
         </div>
-        <div className="services-grid reveal reveal-stagger">
-          {services.map((svc) => {
-            const Icon = svc.icon;
-            return (
-              <div className="service-card" key={svc.title} style={{ '--svc-accent': svc.color } as React.CSSProperties}>
-                <span className="service-tag" style={{ background: svc.color }}>{svc.title.split(' ')[0]}</span>
-                <span className="service-icon"><Icon size={28} strokeWidth={1.8} /></span>
-                <h3>{svc.title}</h3>
-                <p>{svc.desc}</p>
+        <div className="svc-rail-grid">
+          {[0, 1].map((row) => (
+            <div className="svc-rail-row" key={row}>
+              <div className="svc-rail" />
+              <div className="svc-cards-in-row">
+                {services.slice(row * 3, row * 3 + 3).map((svc, i) => (
+                  <ServiceCard key={svc.title} svc={svc} index={row * 3 + i} />
+                ))}
               </div>
-            );
-          })}
+            </div>
+          ))}
         </div>
       </div>
     </section>
