@@ -165,6 +165,18 @@ h3 { font-size: 1.3rem; line-height: 1.2; }
 .hero-headline .hl-sage { color: var(--forest); font-style: italic; }
 .hero-star { display: inline-block; color: var(--butter); -webkit-text-stroke: 1px var(--ink); font-size: 1.3em; }
 
+.hero-ctas { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 8px; }
+.hero-btn {
+  align-items: center; border: 2px solid var(--ink); display: inline-flex; font-family: 'Space Mono', monospace;
+  font-size: 12px; font-weight: 700; gap: 7px; letter-spacing: .04em; padding: 12px 20px; text-transform: uppercase;
+  transition: all .2s;
+}
+.hero-btn-primary { background: var(--ink); color: white; box-shadow: 4px 4px 0 var(--terracotta); }
+.hero-btn-primary:hover { transform: translate(-2px, -2px); box-shadow: 6px 6px 0 var(--terracotta); }
+.hero-btn-secondary { background: white; color: var(--ink); box-shadow: 4px 4px 0 var(--ink); }
+.hero-btn-secondary:hover { background: var(--butter); transform: translate(-2px, -2px); box-shadow: 6px 6px 0 var(--ink); }
+.hero-btn:focus-visible { outline: 2px solid var(--terracotta); outline-offset: 3px; }
+
 /* Photo frame + hover panel */
 .hero-photo-wrap { cursor: pointer; outline: none; }
 .hero-photo-wrap:focus-visible { outline: 2px solid var(--terracotta); outline-offset: 3px; }

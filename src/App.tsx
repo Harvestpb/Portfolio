@@ -345,6 +345,10 @@ function Hero() {
           <p className="hero-headline">
             I turn <span className="hl-terra">complex ideas</span> into <span className="hl-sage">useful digital experiences</span>. <span className="hero-star">✦</span>
           </p>
+          <div className="hero-ctas">
+            <a href="#work" className="hero-btn hero-btn-primary">View my work <ArrowRight size={14} /></a>
+            <a href="#contact" className="hero-btn hero-btn-secondary">Let&apos;s talk <ArrowRight size={14} /></a>
+          </div>
         </div>
 
         <div
