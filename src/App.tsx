@@ -93,7 +93,7 @@ const projects: Project[] = [
 ];
 
 const heroImage = '/images/6cdc158b-81fd-4166-8284-77086ba51076.png';
-const profileImage = '/images/WhatsApp_Image_2026-09-24_at_3.20.17_PM.jpeg';
+const profileImage = '/images/1733035251754.jpg';
 const caseStudyImages: Record<string, string> = {
   cosave: '/images/Cosave_(1).png',
   foodpalette: '/images/Food_app_(1).jpg',
